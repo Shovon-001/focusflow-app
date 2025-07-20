@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow - AI-Powered Productivity Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+            border-radius: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-icon span {
+            position: relative;
+            z-index: 2;
+            font-size: 18px;
+            color: #6b7280;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+            transition: all 0.3s ease;
+        }
+        
+        .nav-icon:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-icon:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-icon:hover span {
+            transform: scale(1.1);
+            color: #4b5563;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        
+        .nav-icon:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-icon.active {
+            background: rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(102, 126, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(102, 126, 234, 0.2);
+        }
+        
+        .nav-icon.active::before {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.1));
+            opacity: 1;
+        }
+        
+        .nav-icon.active span {
+            color: #667eea;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+        }
+        
+        .nav-icon.active:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(102, 126, 234, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -1px 0 rgba(102, 126, 234, 0.3);
+            background: rgba(102, 126, 234, 0.25);
+        }
+        
+        .card-3d {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 20px;
+            box-shadow: 20px 20px 40px #d1d1d1, -20px -20px 40px #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .card-3d:hover {
+            transform: translateY(-5px);
+            box-shadow: 25px 25px 50px #d1d1d1, -25px -25px 50px #ffffff;
+        }
+        
+        .btn-3d {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 15px;
+            box-shadow: 5px 5px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        /* Floating Mode Styles */
+        .floating-mode {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(102, 126, 234, 0.95);
+            border-radius: 50%;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            cursor: move;
+            user-select: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .floating-mode.workout {
+            background: rgba(239, 68, 68, 0.95);
+        }
+        
+        .floating-mode.paused {
+            background: rgba(156, 163, 175, 0.95);
+        }
+        
+        /* Responsive Design */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .main-container {
+                flex-direction: row;
+                max-width: 100vw;
+                height: 100vh;
+            }
+            
+            .content-area {
+                flex: 1;
+                overflow-y: auto;
+            }
+            
+            .bottom-nav {
+                position: relative;
+                width: auto;
+                flex-direction: column;
+                height: 100vh;
+                padding: 20px 10px;
+            }
+            
+            .nav-icon {
+                margin-bottom: 10px;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+            }
+        }
+        
+        .aura-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        .level-up-animation {
+            animation: bounce 0.6s ease-in-out;
+        }
+        
+        .vibe-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9624f9a687f3a47e',t:'MTc1MzA0MDg5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+    <!-- Login/Signup Screen -->
+    <div id="authScreen" class="fixed inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 m-4 max-w-md w-full shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="text-4xl mb-4">✨</div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">FocusFlow</h1>
+                <p class="text-gray-600 mt-2">Your AI-Powered Aura Booster</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4" onsubmit="return false;">
+                <h2 class="text-xl font-semibold text-center mb-6">Welcome Back!</h2>
+                <input type="email" placeholder="Email" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" id="loginEmail" required>
+                <input type="password" placeholder="Password" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" id="loginPassword" required onkeypress="if(event.key==='Enter') login()">
+                <button onclick="login()" class="w-full btn-3d text-white py-4 rounded-xl font-semibold" type="button">Sign In</button>
+                <p class="text-center text-gray-600">Don't have an account? <button onclick="showSignup()" class="text-purple-600 font-semibold" type="button">Sign Up</button></p>
+            </form>
+            
+            <form id="signupForm" class="space-y-4 hidden" onsubmit="return false;">
+                <h2 class="text-xl font-semibold text-center mb-6">Join the Aura Revolution!</h2>
+                <input type="text" placeholder="Full Name" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" id="signupName" required>
+                <input type="email" placeholder="Email" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" id="signupEmail" required>
+                <input type="password" placeholder="Password" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" id="signupPassword" required>
+                <input type="password" placeholder="Confirm Password" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" id="confirmPassword" required onkeypress="if(event.key==='Enter') signup()">
+                <button onclick="signup()" class="w-full btn-3d text-white py-4 rounded-xl font-semibold" type="button">Create Account</button>
+                <p class="text-center text-gray-600">Already have an account? <button onclick="showLogin()" class="text-purple-600 font-semibold" type="button">Sign In</button></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Timer -->
+    <div id="floatingTimer" class="floating-mode hidden">
+        <div class="text-lg font-bold" id="floatingTime">25:00</div>
+        <div class="text-xs" id="floatingMode">Study</div>
+        <div class="text-xs mt-1" id="floatingAura">+0 Aura</div>
+        <button onclick="toggleFloatingTimer()" class="text-xs mt-1 bg-white bg-opacity-20 px-2 py-1 rounded">⏸️</button>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notification" class="notification bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        <div class="flex items-center">
+            <span id="notificationText">Stay focused! You're doing great!</span>
+            <button onclick="hideNotification()" class="ml-4 text-white hover:text-gray-200">×</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container max-w-md mx-auto bg-white min-h-screen relative flex flex-col" id="mainApp" style="display: none;">
+        <!-- Header -->
+        <div class="gradient-bg text-white p-6 rounded-b-3xl">
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-2xl font-bold">FocusFlow</h1>
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleFloatingMode()" class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-sm">🎯</button>
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-sm font-semibold" id="userInitials">A</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-white text-opacity-90" id="welcomeMessage">Welcome back, Alex!</p>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area flex-1 p-6 pb-24 overflow-y-auto">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <!-- Progress & Stats Display -->
+                <div class="card-3d p-6 mb-6 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600" id="totalScore">847</div>
+                            <div class="text-sm text-blue-600 font-medium">Total Score</div>
+                            <div class="text-xs text-gray-600" id="scoreChange">+12 today</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl" id="profileBadge">🌱</div>
+                            <div class="text-xs text-purple-600 font-medium mt-1" id="badgeTitle">Newbie</div>
+                            <div class="text-xs text-gray-500" id="badgeLevel">Level 1</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="totalPoints">45</div>
+                            <div class="text-sm text-purple-600">💎 Points</div>
+                            <button onclick="openPointsStore()" class="text-xs bg-purple-500 text-white px-2 py-1 rounded-full mt-1 hover:bg-purple-600">Store</button>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-50 rounded-lg p-3">
+                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                            <span id="currentLevelText">Level 1</span>
+                            <span id="nextLevelText">Next: 500</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-400 to-purple-500 h-3 rounded-full transition-all duration-500" style="width: 15%" id="progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge Center -->
+                <div class="card-3d p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">🎯 Challenge Center</h3>
+                        <button onclick="createChallenge()" class="btn-3d text-white px-4 py-2 rounded-lg text-sm">Create</button>
+                    </div>
+                    
+                    <!-- Active Challenges -->
+                    <div class="space-y-3 mb-4">
+                        <div class="p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-l-4 border-orange-400">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="font-medium text-orange-800">30-Day Focus Challenge</div>
+                                <div class="text-xs text-orange-600">Day 12/30</div>
+                            </div>
+                            <div class="text-sm text-orange-600 mb-2">Study 2+ hours daily for 30 days</div>
+                            <div class="w-full bg-orange-200 rounded-full h-2">
+                                <div class="bg-orange-500 h-2 rounded-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-l-4 border-blue-400">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="font-medium text-blue-800">Weekly Workout Goal</div>
+                                <div class="text-xs text-blue-600">3/5 sessions</div>
+                            </div>
+                            <div class="text-sm text-blue-600 mb-2">Complete 5 workout sessions this week</div>
+                            <div class="w-full bg-blue-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Challenge Friends -->
+                    <div class="bg-purple-50 p-3 rounded-lg">
+                        <div class="text-sm font-medium text-purple-800 mb-2">Friend Challenges</div>
+                        <div class="flex space-x-2">
+                            <button onclick="challengeFriend('study')" class="text-xs bg-purple-500 text-white px-3 py-1 rounded-full">Study Race</button>
+                            <button onclick="challengeFriend('focus')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Focus Battle</button>
+                            <button onclick="challengeFriend('streak')" class="text-xs bg-green-500 text-white px-3 py-1 rounded-full">Streak War</button>
+                        </div>
+                    </div>
+          </div>
+  
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button onclick="startQuickTimer(25)" class="card-3d p-4 text-center hover:shadow-lg transition-all">
+                        <div class="text-2xl mb-2">🍅</div>
+                        <div class="font-semibold text-gray-800">Pomodoro</div>
+                        <div class="text-xs text-gray-600">25 min focus</div>
+                    </button>
+                    <button onclick="startQuickTimer(15)" class="card-3d p-4 text-center hover:shadow-lg transition-all">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <div class="font-semibold text-gray-800">Quick Focus</div>
+                        <div class="text-xs text-gray-600">15 min burst</div>
+                    </button>
+                    <button onclick="startQuickTimer(5)" class="card-3d p-4 text-center hover:shadow-lg transition-all">
+                        <div class="text-2xl mb-2">🧘</div>
+                        <div class="font-semibold text-gray-800">Meditation</div>
+                        <div class="text-xs text-gray-600">5 min calm</div>
+                    </button>
+                    <button onclick="startQuickTimer(30)" class="card-3d p-4 text-center hover:shadow-lg transition-all">
+                        <div class="text-2xl mb-2">💪</div>
+                        <div class="font-semibold text-gray-800">Workout</div>
+                        <div class="text-xs text-gray-600">30 min active</div>
+                    </button>
+                </div>
+
+                <!-- Today's Achievements -->
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">🏆 Today's Achievements</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                <div class="ml-3">
+                                    <div class="font-medium text-green-800">Morning Focus Session</div>
+                                    <div class="text-xs text-green-600">Completed 25 min Pomodoro</div>
+                                </div>
+                            </div>
+                            <div class="text-green-600 font-semibold">+15 🔥</div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                <div class="ml-3">
+                                    <div class="font-medium text-blue-800">Workout Complete</div>
+                                    <div class="text-xs text-blue-600">30 min strength training</div>
+                                </div>
+                            </div>
+                            <div class="text-blue-600 font-semibold">+20 🔥</div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>
+                                <div class="ml-3">
+                                    <div class="font-medium text-purple-800">Meditation Streak</div>
+                                    <div class="text-xs text-purple-600">7 days in a row!</div>
+                                </div>
+                            </div>
+                            <div class="text-purple-600 font-semibold">+10 🔥</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer Section -->
+            <div id="timer" class="section hidden">
+                <div class="card-3d p-8 mb-6 text-center">
+                    <div class="mb-6">
+                        <div class="text-6xl font-bold text-gray-800 mb-2" id="timerDisplay">25:00</div>
+                        <div class="text-lg text-gray-600" id="timerMode">Focus Session</div>
+                        <div class="text-sm text-purple-600 font-medium" id="auraGain">+0 Aura Points</div>
+                    </div>
+                    
+                    <div class="flex justify-center mb-6">
+                        <svg class="progress-ring w-32 h-32" viewBox="0 0 84 84">
+                            <circle class="progress-ring-circle" stroke="#667eea" stroke-width="4" fill="transparent" r="40" cx="42" cy="42" id="progressCircle"/>
+                        </svg>
+                    </div>
+                    
+                    <div class="flex justify-center space-x-4 mb-6">
+                        <button onclick="startTimer()" id="startBtn" class="btn-3d text-white px-6 py-3 rounded-xl font-semibold">Start</button>
+                        <button onclick="pauseTimer()" id="pauseBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-xl font-semibold hidden">Pause</button>
+                        <button onclick="resetTimer()" id="resetBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold">Reset</button>
+                    </div>
+                    
+                    <!-- Timer Presets -->
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setTimer(15)" class="p-2 bg-blue-100 hover:bg-blue-200 rounded-lg text-sm">15m</button>
+                        <button onclick="setTimer(25)" class="p-2 bg-green-100 hover:bg-green-200 rounded-lg text-sm">25m</button>
+                        <button onclick="setTimer(45)" class="p-2 bg-purple-100 hover:bg-purple-200 rounded-lg text-sm">45m</button>
+                        <button onclick="setTimer(60)" class="p-2 bg-red-100 hover:bg-red-200 rounded-lg text-sm">60m</button>
+                    </div>
+                </div>
+                
+                <!-- Session Stats -->
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">📊 Session Stats</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-3 bg-blue-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600" id="todaySessions">3</div>
+                            <div class="text-sm text-blue-600">Today's Sessions</div>
+                        </div>
+                        <div class="text-center p-3 bg-green-50 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600" id="weekStreak">7</div>
+                            <div class="text-sm text-green-600">Day Streak</div>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600" id="totalMinutes">145</div>
+                            <div class="text-sm text-purple-600">Total Minutes</div>
+                        </div>
+                        <div class="text-center p-3 bg-orange-50 rounded-lg">
+                            <div class="text-2xl font-bold text-orange-600" id="auraEarned">85</div>
+                            <div class="text-sm text-orange-600">Aura Earned</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Content Generator Section -->
+            <div id="aiContent" class="section hidden">
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">🤖 AI Content Generator</h3>
+                    
+                    <!-- Content Type Selection -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <button onclick="selectContentType('study')" class="content-type-btn p-3 bg-blue-100 hover:bg-blue-200 rounded-lg text-center transition-all" data-type="study">
+                            <div class="text-2xl mb-1">📚</div>
+                            <div class="text-sm font-medium">Study Plan</div>
+                        </button>
+                        <button onclick="selectContentType('workout')" class="content-type-btn p-3 bg-red-100 hover:bg-red-200 rounded-lg text-center transition-all" data-type="workout">
+                            <div class="text-2xl mb-1">💪</div>
+                            <div class="text-sm font-medium">Workout</div>
+                        </button>
+                        <button onclick="selectContentType('meditation')" class="content-type-btn p-3 bg-purple-100 hover:bg-purple-200 rounded-lg text-center transition-all" data-type="meditation">
+                            <div class="text-2xl mb-1">🧘</div>
+                            <div class="text-sm font-medium">Meditation</div>
+                        </button>
+                        <button onclick="selectContentType('motivation')" class="content-type-btn p-3 bg-yellow-100 hover:bg-yellow-200 rounded-lg text-center transition-all" data-type="motivation">
+                            <div class="text-2xl mb-1">⚡</div>
+                            <div class="text-sm font-medium">Motivation</div>
+                        </button>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="mb-4">
+                        <textarea id="aiPrompt" placeholder="Describe what you need help with..." class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 h-24 resize-none"></textarea>
+                    </div>
+                    
+                    <!-- Generate Button -->
+                    <button onclick="generateAIContent()" class="w-full btn-3d text-white py-3 rounded-xl font-semibold mb-4">Generate Content</button>
+                    
+                    <!-- Generated Content Display -->
+                    <div id="generatedContent" class="hidden">
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-semibold text-gray-800">Generated Content</h4>
+                                <div class="flex space-x-2">
+                                    <button onclick="copyContent()" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Copy</button>
+                                    <button onclick="saveContent()" class="text-xs bg-green-500 text-white px-3 py-1 rounded-full">Save</button>
+                                    <button onclick="exportToPDF()" class="text-xs bg-red-500 text-white px-3 py-1 rounded-full">PDF</button>
+                                </div>
+                            </div>
+                            <div id="contentOutput" class="text-gray-700 whitespace-pre-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Saved Content -->
+                <div class="card-3d p-6">
+                    <h3 class="text-lg font-semibold mb-4">💾 Saved Content</h3>
+                    <div id="savedContentList" class="space-y-3">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-medium text-blue-800">Math Study Plan</div>
+                                    <div class="text-xs text-blue-600">Created 2 hours ago</div>
+                                </div>
+                                <button onclick="loadSavedContent(0)" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Load</button>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-medium text-red-800">HIIT Workout</div>
+                                    <div class="text-xs text-red-600">Created yesterday</div>
+                                </div>
+                                <button onclick="loadSavedContent(1)" class="text-xs bg-red-500 text-white px-3 py-1 rounded-full">Load</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+  </div>
+                                                                            
+            <!-- Community Section -->
+            <div id="community" class="section hidden">
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">👥 Community Hub</h3>
+                    
+                    <!-- Leaderboard -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-800 mb-3">🏆 Weekly Leaderboard</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm font-bold">1</div>
+                                    <div class="ml-3">
+                                        <div class="font-medium text-yellow-800">Sarah Chen</div>
+                                        <div class="text-xs text-yellow-600">Productivity Master</div>
+                                    </div>
+                                </div>
+                                <div class="text-yellow-600 font-bold">2,847 🔥</div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-l-4 border-gray-400">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-sm font-bold">2</div>
+                                    <div class="ml-3">
+                                        <div class="font-medium text-gray-800">Mike Johnson</div>
+                                        <div class="text-xs text-gray-600">Focus Warrior</div>
+                                    </div>
+                                </div>
+                                <div class="text-gray-600 font-bold">2,156 🔥</div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
+                                    <div class="ml-3">
+                                        <div class="font-medium text-orange-800">Alex Rivera</div>
+                                        <div class="text-xs text-orange-600">Study Beast</div>
+                                    </div>
+                                </div>
+                                <div class="text-orange-600 font-bold">1,923 🔥</div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">4</div>
+                                    <div class="ml-3">
+                                        <div class="font-medium text-blue-800">You</div>
+                                        <div class="text-xs text-blue-600">Rising Star</div>
+                                    </div>
+                                </div>
+                                <div class="text-blue-600 font-bold">847 🔥</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Study Groups -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-800 mb-3">📚 Study Groups</h4>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-purple-50 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="font-medium text-purple-800">Math Study Squad</div>
+                                    <div class="text-xs text-purple-600">12 members</div>
+                                </div>
+                                <div class="text-sm text-purple-600 mb-2">Preparing for calculus exam together</div>
+                                <div class="flex space-x-2">
+                                    <button onclick="joinGroup('math')" class="text-xs bg-purple-500 text-white px-3 py-1 rounded-full">Join</button>
+                                    <button onclick="viewGroup('math')" class="text-xs bg-purple-100 text-purple-600 px-3 py-1 rounded-full">View</button>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="font-medium text-green-800">Fitness Warriors</div>
+                                    <div class="text-xs text-green-600">8 members</div>
+                                </div>
+                                <div class="text-sm text-green-600 mb-2">Daily workout challenges and motivation</div>
+                                <div class="flex space-x-2">
+                                    <button onclick="joinGroup('fitness')" class="text-xs bg-green-500 text-white px-3 py-1 rounded-full">Join</button>
+                                    <button onclick="viewGroup('fitness')" class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full">View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Friend Activity -->
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">⚡ Friend Activity</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center p-2 bg-blue-50 rounded-lg">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">SC</div>
+                                <div class="ml-3 flex-1">
+                                    <div class="text-sm text-blue-800">Sarah completed a 45-min focus session</div>
+                                    <div class="text-xs text-blue-600">2 minutes ago</div>
+                                </div>
+                                <div class="text-blue-600 text-sm">+30 🔥</div>
+                            </div>
+                            <div class="flex items-center p-2 bg-green-50 rounded-lg">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">MJ</div>
+                                <div class="ml-3 flex-1">
+                                    <div class="text-sm text-green-800">Mike finished a HIIT workout</div>
+                                    <div class="text-xs text-green-600">15 minutes ago</div>
+                                </div>
+                                <div class="text-green-600 text-sm">+25 🔥</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Create Group -->
+                <div class="card-3d p-6">
+                    <h3 class="text-lg font-semibold mb-4">➕ Create Study Group</h3>
+                    <div class="space-y-4">
+                        <input type="text" placeholder="Group Name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" id="groupName">
+                        <textarea placeholder="Description" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 h-20 resize-none" id="groupDescription"></textarea>
+                        <select class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" id="groupCategory">
+                            <option value="">Select Category</option>
+                            <option value="study">Study</option>
+                            <option value="fitness">Fitness</option>
+                            <option value="meditation">Meditation</option>
+                            <option value="productivity">Productivity</option>
+                        </select>
+                        <button onclick="createGroup()" class="w-full btn-3d text-white py-3 rounded-lg font-semibold">Create Group</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="section hidden">
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">📊 Your Analytics</h3>
+                    
+                    <!-- Time Period Selector -->
+                    <div class="flex space-x-2 mb-6">
+                        <button onclick="setAnalyticsPeriod('week')" class="analytics-period-btn px-4 py-2 bg-purple-500 text-white rounded-lg text-sm" data-period="week">This Week</button>
+                        <button onclick="setAnalyticsPeriod('month')" class="analytics-period-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm" data-period="month">This Month</button>
+                        <button onclick="setAnalyticsPeriod('year')" class="analytics-period-btn px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm" data-period="year">This Year</button>
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <div class="text-3xl font-bold text-blue-600" id="totalFocusTime">12.5</div>
+                            <div class="text-sm text-blue-600">Hours Focused</div>
+                            <div class="text-xs text-gray-500">+2.3 from last week</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <div class="text-3xl font-bold text-green-600" id="completedSessions">23</div>
+                            <div class="text-sm text-green-600">Sessions Done</div>
+                            <div class="text-xs text-gray-500">+5 from last week</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-600" id="currentStreak">7</div>
+                            <div class="text-sm text-purple-600">Day Streak</div>
+                            <div class="text-xs text-gray-500">Personal best!</div>
+                        </div>
+                        <div class="text-center p-4 bg-orange-50 rounded-lg">
+                            <div class="text-3xl font-bold text-orange-600" id="avgSessionLength">32</div>
+                            <div class="text-sm text-orange-600">Avg Session (min)</div>
+                            <div class="text-xs text-gray-500">+8 from last week</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Chart -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-800 mb-3">📈 Weekly Activity</h4>
+                        <div class="flex items-end justify-between h-32 bg-gray-50 rounded-lg p-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 60px;"></div>
+                                <div class="text-xs text-gray-600">Mon</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 80px;"></div>
+                                <div class="text-xs text-gray-600">Tue</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 45px;"></div>
+                                <div class="text-xs text-gray-600">Wed</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 90px;"></div>
+                                <div class="text-xs text-gray-600">Thu</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 70px;"></div>
+                                <div class="text-xs text-gray-600">Fri</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 55px;"></div>
+                                <div class="text-xs text-gray-600">Sat</div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="w-6 bg-blue-500 rounded-t mb-2" style="height: 40px;"></div>
+                                <div class="text-xs text-gray-600">Sun</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Session Types Breakdown -->
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">🎯 Session Types</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2 bg-blue-50 rounded">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-blue-500 rounded mr-3"></div>
+                                    <span class="text-sm text-blue-800">Study Sessions</span>
+                                </div>
+                                <span class="text-sm font-medium text-blue-600">65%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-red-50 rounded">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-red-500 rounded mr-3"></div>
+                                    <span class="text-sm text-red-800">Workout</span>
+                                </div>
+                                <span class="text-sm font-medium text-red-600">20%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-purple-50 rounded">
+                                <div class="flex items-center">
+                                    <div class="w-4 h-4 bg-purple-500 rounded mr-3"></div>
+                                    <span class="text-sm text-purple-800">Meditation</span>
+                                </div>
+                                <span class="text-sm font-medium text-purple-600">15%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Goals & Insights -->
+                <div class="card-3d p-6">
+                    <h3 class="text-lg font-semibold mb-4">🎯 Goals & Insights</h3>
+                    <div class="space-y-4">
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                            <div class="font-medium text-green-800">Weekly Goal: 15 hours</div>
+                            <div class="text-sm text-green-600 mb-2">Progress: 12.5/15 hours (83%)</div>
+                            <div class="w-full bg-green-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 83%"></div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <div class="font-medium text-blue-800">💡 Insight</div>
+                            <div class="text-sm text-blue-600">Your most productive time is 9-11 AM. Try scheduling important tasks then!</div>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <div class="font-medium text-purple-800">🏆 Achievement Unlocked</div>
+                            <div class="text-sm text-purple-600">7-day streak! You're building great habits.</div>
+                        </div>
+                    </div>
+                </div>
+                  </div>
+                                  
+            <!-- Settings Section -->
+            <div id="settings" class="section hidden">
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">⚙️ App Settings</h3>
+                    
+                    <!-- Notification Settings -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-800 mb-3">🔔 Notifications</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium text-gray-800">Focus Reminders</div>
+                                    <div class="text-sm text-gray-600">Get reminded to start focus sessions</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked onchange="toggleSetting('focusReminders', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium text-gray-800">Break Notifications</div>
+                                    <div class="text-sm text-gray-600">Alerts when it's time for a break</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked onchange="toggleSetting('breakNotifications', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium text-gray-800">Achievement Alerts</div>
+                                    <div class="text-sm text-gray-600">Celebrate your wins with notifications</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" checked onchange="toggleSetting('achievementAlerts', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Timer Settings -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-800 mb-3">⏰ Timer Preferences</h4>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Default Focus Duration</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" onchange="updateSetting('defaultFocusDuration', this.value)">
+                                    <option value="15">15 minutes</option>
+                                    <option value="25" selected>25 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60">60 minutes</option>
+                                </select>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Break Duration</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" onchange="updateSetting('breakDuration', this.value)">
+                                    <option value="5" selected>5 minutes</option>
+                                    <option value="10">10 minutes</option>
+                                    <option value="15">15 minutes</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium text-gray-800">Auto-start Breaks</div>
+                                    <div class="text-sm text-gray-600">Automatically start break timer</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer" onchange="toggleSetting('autoStartBreaks', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Theme Settings -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-800 mb-3">🎨 Appearance</h4>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="setTheme('light')" class="theme-btn p-3 bg-white border-2 border-purple-500 rounded-lg text-center" data-theme="light">
+                                <div class="w-8 h-8 bg-white border border-gray-300 rounded mx-auto mb-2"></div>
+                                <div class="text-xs font-medium">Light</div>
+                            </button>
+                            <button onclick="setTheme('dark')" class="theme-btn p-3 bg-gray-100 border-2 border-gray-300 rounded-lg text-center" data-theme="dark">
+                                <div class="w-8 h-8 bg-gray-800 rounded mx-auto mb-2"></div>
+                                <div class="text-xs font-medium">Dark</div>
+                            </button>
+                            <button onclick="setTheme('auto')" class="theme-btn p-3 bg-gray-100 border-2 border-gray-300 rounded-lg text-center" data-theme="auto">
+                                <div class="w-8 h-8 bg-gradient-to-r from-white to-gray-800 rounded mx-auto mb-2"></div>
+                                <div class="text-xs font-medium">Auto</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Settings -->
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">👤 Profile</h3>
+                    <div class="space-y-4">
+                        <div class="text-center mb-6">
+                            <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-3" id="profileAvatar">🌱</div>
+                            <button onclick="changeAvatar()" class="text-sm bg-purple-500 text-white px-4 py-2 rounded-lg">Change Avatar</button>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+                            <input type="text" value="Alex Rivera" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" id="displayName" onchange="updateProfile('name', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" value="alex@example.com" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" id="userEmail" onchange="updateProfile('email', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 h-20 resize-none" placeholder="Tell us about yourself..." id="userBio" onchange="updateProfile('bio', this.value)">Productivity enthusiast and lifelong learner 🚀</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data & Privacy -->
+                <div class="card-3d p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">🔒 Data & Privacy</h3>
+                    <div class="space-y-3">
+                        <button onclick="exportData()" class="w-full p-3 bg-blue-50 hover:bg-blue-100 rounded-lg text-left transition-all">
+                            <div class="font-medium text-blue-800">📥 Export My Data</div>
+                            <div class="text-sm text-blue-600">Download all your data as JSON</div>
+                        </button>
+                        <button onclick="clearData()" class="w-full p-3 bg-red-50 hover:bg-red-100 rounded-lg text-left transition-all">
+                            <div class="font-medium text-red-800">🗑️ Clear All Data</div>
+                            <div class="text-sm text-red-600">Reset app to initial state</div>
+                        </button>
+                        <button onclick="showPrivacyPolicy()" class="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-left transition-all">
+                            <div class="font-medium text-gray-800">📋 Privacy Policy</div>
+                            <div class="text-sm text-gray-600">Learn how we protect your data</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- About -->
+                <div class="card-3d p-6">
+                    <h3 class="text-lg font-semibold mb-4">ℹ️ About</h3>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">✨</div>
+                        <div class="text-xl font-bold text-purple-600 mb-2">FocusFlow</div>
+                        <div class="text-sm text-gray-600 mb-4">Version 2.1.0</div>
+                        <div class="text-sm text-gray-700 mb-4">Your AI-powered productivity companion for building better habits and achieving your goals.</div>
+                        <div class="flex justify-center space-x-4">
+                            <button onclick="showSupport()" class="text-sm bg-purple-500 text-white px-4 py-2 rounded-lg">Support</button>
+                            <button onclick="showFeedback()" class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg">Feedback</button>
+                            <button onclick="logout()" class="text-sm bg-red-500 text-white px-4 py-2 rounded-lg">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3">
+            <div class="flex justify-around items-center max-w-md mx-auto">
+                <button onclick="showSection('dashboard')" class="nav-icon active" data-section="dashboard">
+                    <span>🏠</span>
+                </button>
+                <button onclick="showSection('timer')" class="nav-icon" data-section="timer">
+                    <span>⏰</span>
+                </button>
+                <button onclick="showSection('aiContent')" class="nav-icon" data-section="aiContent">
+                    <span>🤖</span>
+                </button>
+                <button onclick="showSection('community')" class="nav-icon" data-section="community">
+                    <span>👥</span>
+                </button>
+                <button onclick="showSection('analytics')" class="nav-icon" data-section="analytics">
+                    <span>📊</span>
+                </button>
+                <button onclick="showSection('settings')" class="nav-icon" data-section="settings">
+                    <span>⚙️</span>
+                </button>
+            </div>
+        </div>
+                                  </div>
+                                      
+    <script>
+        // Global Variables
+        let currentUser = null;
+        let timerInterval = null;
+        let currentTime = 25 * 60; // 25 minutes in seconds
+        let isTimerRunning = false;
+        let isFloatingMode = false;
+        let currentSection = 'dashboard';
+        let selectedContentType = 'study';
+        let savedContent = [
+            { type: 'study', title: 'Math Study Plan', content: 'Focus on algebra basics, practice 20 problems daily...', date: new Date(Date.now() - 2*60*60*1000) },
+            { type: 'workout', title: 'HIIT Workout', content: '20 seconds work, 10 seconds rest, repeat for 4 minutes...', date: new Date(Date.now() - 24*60*60*1000) }
+        ];
+        
+        // User data simulation
+        let userData = {
+            name: 'Alex Rivera',
+            email: 'alex@example.com',
+            totalScore: 847,
+            totalPoints: 45,
+            level: 1,
+            badge: '🌱',
+            badgeTitle: 'Newbie',
+            todaySessions: 3,
+            weekStreak: 7,
+            totalMinutes: 145,
+            auraEarned: 85,
+            settings: {
+                focusReminders: true,
+                breakNotifications: true,
+                achievementAlerts: true,
+                defaultFocusDuration: 25,
+                breakDuration: 5,
+                autoStartBreaks: false,
+                theme: 'light'
+            }
+        };
+
+        // Authentication Functions
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+        }
+
+        function showSignup() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            // Simulate login
+            currentUser = { email, name: userData.name };
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('userInitials').textContent = userData.name.split(' ').map(n => n[0]).join('');
+            document.getElementById('welcomeMessage').textContent = `Welcome back, ${userData.name.split(' ')[0]}!`;
+            
+            showNotification('Welcome back! Ready to boost your aura?', 'success');
+            updateDashboard();
+        }
+
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!name || !email || !password || !confirmPassword) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            // Simulate signup
+            userData.name = name;
+            userData.email = email;
+            currentUser = { email, name };
+            
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+            document.getElementById('userInitials').textContent = name.split(' ').map(n => n[0]).join('');
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${name.split(' ')[0]}!`;
+            
+            showNotification('Account created! Welcome to FocusFlow!', 'success');
+            updateDashboard();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                document.getElementById('authScreen').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+                showNotification('Logged out successfully', 'success');
+            }
+        }
+
+        // Navigation Functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-icon').forEach(icon => {
+                icon.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+            
+            currentSection = sectionName;
+            
+            // Load section-specific data
+            if (sectionName === 'analytics') {
+                updateAnalytics();
+            } else if (sectionName === 'community') {
+                updateCommunity();
+            }
+        }
+
+        // Timer Functions
+        function startTimer() {
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                document.getElementById('startBtn').classList.add('hidden');
+                document.getElementById('pauseBtn').classList.remove('hidden');
+                
+                timerInterval = setInterval(() => {
+                    currentTime--;
+                    updateTimerDisplay();
+                    updateProgressCircle();
+                    
+                    if (currentTime <= 0) {
+                        completeSession();
+                    }
+                }, 1000);
+                
+                showNotification('Focus session started! You got this! 🔥', 'success');
+            }
+        }
+
+        function pauseTimer() {
+            if (isTimerRunning) {
+                isTimerRunning = false;
+                clearInterval(timerInterval);
+                document.getElementById('startBtn').classList.remove('hidden');
+                document.getElementById('pauseBtn').classList.add('hidden');
+                showNotification('Timer paused. Take a breath and resume when ready.', 'info');
+            }
+        }
+
+        function resetTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            currentTime = userData.settings.defaultFocusDuration * 60;
+            updateTimerDisplay();
+            updateProgressCircle();
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('pauseBtn').classList.add('hidden');
+            showNotification('Timer reset. Ready for a fresh start!', 'info');
+        }
+
+        function setTimer(minutes) {
+            if (!isTimerRunning) {
+                currentTime = minutes * 60;
+                updateTimerDisplay();
+                updateProgressCircle();
+                showNotification(`Timer set to ${minutes} minutes`, 'info');
+            }
+        }
+
+        function startQuickTimer(minutes) {
+            showSection('timer');
+            setTimer(minutes);
+            setTimeout(() => startTimer(), 500);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(currentTime / 60);
+            const seconds = currentTime % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timerDisplay').textContent = display;
+            if (isFloatingMode) {
+                document.getElementById('floatingTime').textContent = display;
+            }
+        }
+
+        function updateProgressCircle() {
+            const totalTime = userData.settings.defaultFocusDuration * 60;
+            const progress = ((totalTime - currentTime) / totalTime) * 251.2; // 2 * π * 40
+            document.getElementById('progressCircle').style.strokeDasharray = `${progress} 251.2`;
+        }
+
+        function completeSession() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            
+            // Update stats
+            userData.todaySessions++;
+            userData.totalMinutes += userData.settings.defaultFocusDuration;
+            userData.auraEarned += 15;
+            userData.totalScore += 15;
+            userData.totalPoints += 3;
+            
+            // Update displays
+            updateDashboard();
+            updateSessionStats();
+            
+            // Show completion
+            showNotification('🎉 Session complete! +15 Aura earned!', 'success');
+            
+            // Reset timer
+            currentTime = userData.settings.defaultFocusDuration * 60;
+            updateTimerDisplay();
+            updateProgressCircle();
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('pauseBtn').classList.add('hidden');
+            
+            // Check for achievements
+            checkAchievements();
+        }
+
+        // Floating Timer Functions
+        function toggleFloatingMode() {
+            isFloatingMode = !isFloatingMode;
+            const floatingTimer = document.getElementById('floatingTimer');
+            
+            if (isFloatingMode) {
+                floatingTimer.classList.remove('hidden');
+                updateFloatingTimer();
+                showNotification('Floating timer enabled! Stay focused anywhere.', 'info');
+            } else {
+                floatingTimer.classList.add('hidden');
+                showNotification('Floating timer disabled.', 'info');
+            }
+        }
+
+        function toggleFloatingTimer() {
+            if (isTimerRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function updateFloatingTimer() {
+            if (isFloatingMode) {
+                const minutes = Math.floor(currentTime / 60);
+                const seconds = currentTime % 60;
+                document.getElementById('floatingTime').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('floatingMode').textContent = isTimerRunning ? 'Focus' : 'Paused';
+                document.getElementById('floatingAura').textContent = `+${userData.auraEarned} Aura`;
+            }
+        }
+
+        // Dashboard Functions
+        function updateDashboard() {
+            document.getElementById('totalScore').textContent = userData.totalScore;
+            document.getElementById('totalPoints').textContent = userData.totalPoints;
+            document.getElementById('profileBadge').textContent = userData.badge;
+            document.getElementById('badgeTitle').textContent = userData.badgeTitle;
+            document.getElementById('badgeLevel').textContent = `Level ${userData.level}`;
+            
+            // Update progress bar
+            const nextLevelScore = userData.level * 500;
+            const progress = (userData.totalScore / nextLevelScore) * 100;
+            document.getElementById('progressBar').style.width = `${Math.min(progress, 100)}%`;
+            document.getElementById('nextLevelText').textContent = `Next: ${nextLevelScore}`;
+            
+            // Update score change
+            document.getElementById('scoreChange').textContent = `+12 today`;
+        }
+
+        function updateSessionStats() {
+            document.getElementById('todaySessions').textContent = userData.todaySessions;
+            document.getElementById('weekStreak').textContent = userData.weekStreak;
+            document.getElementById('totalMinutes').textContent = userData.totalMinutes;
+            document.getElementById('auraEarned').textContent = userData.auraEarned;
+        }
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96250fd7a07ba481',t:'MTc1MzA0MTgwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+        // AI Content Generator Functions
+        function selectContentType(type) {
+            selectedContentType = type;
+            
+            // Update button styles
+            document.querySelectorAll('.content-type-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-purple-500');
+                btn.classList.add('bg-gray-100', 'hover:bg-gray-200');
+            });
+            
+            const selectedBtn = document.querySelector(`[data-type="${type}"]`);
+            selectedBtn.classList.add('ring-2', 'ring-purple-500');
+            selectedBtn.classList.remove('bg-gray-100', 'hover:bg-gray-200');
+            
+            // Update placeholder text
+            const placeholders = {
+                study: 'I need help creating a study plan for calculus...',
+                workout: 'Create a 30-minute HIIT workout for beginners...',
+                meditation: 'Guide me through a 10-minute mindfulness session...',
+                motivation: 'I need motivation to stay focused on my goals...'
+            };
+            
+            document.getElementById('aiPrompt').placeholder = placeholders[type];
+        }
+
+        function generateAIContent() {
+            const prompt = document.getElementById('aiPrompt').value.trim();
+            
+            if (!prompt) {
+                showNotification('Please enter a description of what you need help with', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const generateBtn = event.target;
+            const originalText = generateBtn.textContent;
+            generateBtn.textContent = 'Generating...';
+            generateBtn.disabled = true;
+            
+            // Simulate AI generation delay
+            setTimeout(() => {
+                const content = generateMockContent(selectedContentType, prompt);
+                displayGeneratedContent(content);
+                
+                generateBtn.textContent = originalText;
+                generateBtn.disabled = false;
+                
+                showNotification('Content generated successfully! 🤖', 'success');
+            }, 2000);
+        }
+
+        function generateMockContent(type, prompt) {
+            const templates = {
+                study: `# Study Plan: ${prompt.split(' ').slice(0, 3).join(' ')}
+
+## Week 1-2: Foundation Building
+- Review basic concepts (30 min/day)
+- Practice problems: 10-15 daily
+- Create summary notes
+
+## Week 3-4: Advanced Topics
+- Tackle complex problems
+- Form study groups
+- Take practice tests
+
+## Daily Schedule:
+- 9:00 AM - Theory review (45 min)
+- 2:00 PM - Problem solving (60 min)
+- 7:00 PM - Review & notes (30 min)
+
+## Resources:
+- Textbook chapters 1-5
+- Online practice platform
+- Study group sessions
+
+Remember: Consistency beats intensity! 🎯`,
+
+                workout: `# ${prompt.split(' ').slice(0, 3).join(' ')} Workout Plan
+
+## Warm-up (5 minutes)
+- Jumping jacks: 30 seconds
+- Arm circles: 30 seconds
+- High knees: 30 seconds
+- Butt kicks: 30 seconds
+- Rest: 30 seconds
+
+## Main Workout (20 minutes)
+**Round 1 (repeat 3x):**
+- Burpees: 45 seconds
+- Mountain climbers: 45 seconds
+- Rest: 30 seconds
+
+**Round 2 (repeat 3x):**
+- Squat jumps: 45 seconds
+- Push-ups: 45 seconds
+- Rest: 30 seconds
+
+## Cool Down (5 minutes)
+- Stretching routine
+- Deep breathing
+
+Stay hydrated and listen to your body! 💪`,
+
+                meditation: `# Mindfulness Meditation Guide
+
+## Preparation (2 minutes)
+- Find a quiet, comfortable space
+- Sit with your back straight
+- Close your eyes gently
+- Take 3 deep breaths
+
+## Main Practice (6 minutes)
+1. **Breath Awareness** (3 min)
+   - Focus on your natural breathing
+   - Notice the sensation of air entering and leaving
+   - When mind wanders, gently return to breath
+
+2. **Body Scan** (3 min)
+   - Start from the top of your head
+   - Slowly move attention down your body
+   - Notice any sensations without judgment
+
+## Closing (2 minutes)
+- Take 3 deep breaths
+- Wiggle fingers and toes
+- Slowly open your eyes
+- Set an intention for your day
+
+Remember: There's no "perfect" meditation 🧘‍♀️`,
+
+                motivation: `# Your Motivation Boost 🚀
+
+## Remember Your Why
+${prompt.includes('goal') ? 'Your goals are not just dreams - they are your future reality waiting to be created.' : 'Every small step you take today builds the foundation for tomorrow\'s success.'}
+
+## Daily Affirmations
+- "I am capable of achieving anything I set my mind to"
+- "Every challenge is an opportunity to grow stronger"
+- "I choose progress over perfection"
+- "My consistency today creates my success tomorrow"
+
+## Action Steps
+1. **Start Small**: Break your big goal into tiny, manageable steps
+2. **Celebrate Wins**: Acknowledge every small victory
+3. **Stay Consistent**: Show up every day, even if just for 5 minutes
+4. **Find Your Tribe**: Surround yourself with supportive people
+
+## When You Feel Like Quitting
+- Remember why you started
+- Look at how far you've already come
+- Take a break, but don't give up
+- Ask for help when you need it
+
+You've got this! The world needs what you have to offer. ✨`
+            };
+            
+            return templates[type] || 'Content generated successfully!';
+        }
+
+        function displayGeneratedContent(content) {
+            document.getElementById('contentOutput').textContent = content;
+            document.getElementById('generatedContent').classList.remove('hidden');
+        }
+
+        function copyContent() {
+            const content = document.getElementById('contentOutput').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                showNotification('Content copied to clipboard!', 'success');
+            });
+        }
+
+        function saveContent() {
+            const content = document.getElementById('contentOutput').textContent;
+            const title = content.split('\n')[0].replace('# ', '') || 'Generated Content';
+            
+            savedContent.unshift({
+                type: selectedContentType,
+                title: title,
+                content: content,
+                date: new Date()
+            });
+            
+            updateSavedContentList();
+            showNotification('Content saved successfully!', 'success');
+        }
+
+        function exportToPDF() {
+            const content = document.getElementById('contentOutput').textContent;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated-content.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Content exported as text file!', 'success');
+        }
+
+        function updateSavedContentList() {
+            const listContainer = document.getElementById('savedContentList');
+            listContainer.innerHTML = '';
+            
+            savedContent.slice(0, 5).forEach((item, index) => {
+                const timeAgo = getTimeAgo(item.date);
+                const colorClass = {
+                    study: 'blue',
+                    workout: 'red',
+                    meditation: 'purple',
+                    motivation: 'yellow'
+                }[item.type] || 'gray';
+                
+                listContainer.innerHTML += `
+                    <div class="p-3 bg-${colorClass}-50 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium text-${colorClass}-800">${item.title}</div>
+                                <div class="text-xs text-${colorClass}-600">Created ${timeAgo}</div>
+                            </div>
+                            <button onclick="loadSavedContent(${index})" class="text-xs bg-${colorClass}-500 text-white px-3 py-1 rounded-full">Load</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function loadSavedContent(index) {
+            const content = savedContent[index];
+            document.getElementById('contentOutput').textContent = content.content;
+            document.getElementById('generatedContent').classList.remove('hidden');
+            showNotification('Content loaded!', 'success');
+        }
+
+        // Community Functions
+        function joinGroup(groupType) {
+            showNotification(`Joined ${groupType} group! Welcome to the community! 👥`, 'success');
+        }
+
+        function viewGroup(groupType) {
+            showNotification(`Opening ${groupType} group chat...`, 'info');
+        }
+
+        function createGroup() {
+            const name = document.getElementById('groupName').value;
+            const description = document.getElementById('groupDescription').value;
+            const category = document.getElementById('groupCategory').value;
+            
+            if (!name || !description || !category) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            showNotification(`Group "${name}" created successfully! 🎉`, 'success');
+            
+            // Clear form
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupDescription').value = '';
+            document.getElementById('groupCategory').value = '';
+        }
+
+        function updateCommunity() {
+            // Simulate real-time updates
+            const activities = [
+                { user: 'Sarah Chen', action: 'completed a 45-min focus session', time: '2 minutes ago', points: 30, color: 'blue' },
+                { user: 'Mike Johnson', action: 'finished a HIIT workout', time: '15 minutes ago', points: 25, color: 'green' },
+                { user: 'Emma Davis', action: 'achieved 10-day streak', time: '1 hour ago', points: 50, color: 'purple' }
+            ];
+            
+            // This would update the friend activity section with real data
+        }
+
+        // Analytics Functions
+        function setAnalyticsPeriod(period) {
+            document.querySelectorAll('.analytics-period-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-500', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            document.querySelector(`[data-period="${period}"]`).classList.add('bg-purple-500', 'text-white');
+            document.querySelector(`[data-period="${period}"]`).classList.remove('bg-gray-200', 'text-gray-700');
+            
+            updateAnalytics(period);
+        }
+
+        function updateAnalytics(period = 'week') {
+            const data = {
+                week: { focusTime: 12.5, sessions: 23, streak: 7, avgSession: 32 },
+                month: { focusTime: 48.2, sessions: 89, streak: 7, avgSession: 35 },
+                year: { focusTime: 245.8, sessions: 456, streak: 21, avgSession: 38 }
+            };
+            
+            const current = data[period];
+            document.getElementById('totalFocusTime').textContent = current.focusTime;
+            document.getElementById('completedSessions').textContent = current.sessions;
+            document.getElementById('currentStreak').textContent = current.streak;
+            document.getElementById('avgSessionLength').textContent = current.avgSession;
+        }
+
+        // Utility Functions
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = now - date;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            
+            if (hours < 1) return 'just now';
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            const days = Math.floor(hours / 24);
+            return `${days} day${days > 1 ? 's' : ''} ago`;
+        }
+
+        function checkAchievements() {
+            if (userData.todaySessions === 5) {
+                showNotification('🏆 Achievement Unlocked: Daily Warrior! (5 sessions in one day)', 'success');
+            }
+            if (userData.weekStreak === 7) {
+                showNotification('🔥 Achievement Unlocked: Week Warrior! (7-day streak)', 'success');
+            }
+            if (userData.totalMinutes >= 100) {
+                showNotification('⏰ Achievement Unlocked: Century Club! (100+ minutes)', 'success');
+            }
+        }
+              
+        // Settings Functions
+        function toggleSetting(settingName, value) {
+            userData.settings[settingName] = value;
+            
+            const messages = {
+                focusReminders: value ? 'Focus reminders enabled! We\'ll help you stay on track.' : 'Focus reminders disabled.',
+                breakNotifications: value ? 'Break notifications enabled! We\'ll remind you to rest.' : 'Break notifications disabled.',
+                achievementAlerts: value ? 'Achievement alerts enabled! Celebrate your wins!' : 'Achievement alerts disabled.',
+                autoStartBreaks: value ? 'Auto-start breaks enabled! Seamless workflow activated.' : 'Auto-start breaks disabled.'
+            };
+            
+            showNotification(messages[settingName], 'info');
+            saveUserData();
+        }
+
+        function updateSetting(settingName, value) {
+            userData.settings[settingName] = parseInt(value);
+            
+            const messages = {
+                defaultFocusDuration: `Default focus time set to ${value} minutes`,
+                breakDuration: `Break duration set to ${value} minutes`
+            };
+            
+            showNotification(messages[settingName], 'info');
+            
+            // Update timer if not running
+            if (!isTimerRunning && settingName === 'defaultFocusDuration') {
+                currentTime = value * 60;
+                updateTimerDisplay();
+                updateProgressCircle();
+            }
+            
+            saveUserData();
+        }
+
+        function setTheme(theme) {
+            userData.settings.theme = theme;
+            
+            // Update theme button styles
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('border-purple-500', 'bg-white');
+                btn.classList.add('border-gray-300', 'bg-gray-100');
+            });
+            
+            document.querySelector(`[data-theme="${theme}"]`).classList.add('border-purple-500', 'bg-white');
+            document.querySelector(`[data-theme="${theme}"]`).classList.remove('border-gray-300', 'bg-gray-100');
+            
+            // Apply theme (simplified - would normally change CSS variables)
+            const themeMessages = {
+                light: 'Light theme activated! ☀️',
+                dark: 'Dark theme activated! 🌙',
+                auto: 'Auto theme enabled! Follows system preference 🔄'
+            };
+            
+            showNotification(themeMessages[theme], 'info');
+            saveUserData();
+        }
+
+        // Profile Functions
+        function updateProfile(field, value) {
+            if (field === 'name') {
+                userData.name = value;
+                document.getElementById('userInitials').textContent = value.split(' ').map(n => n[0]).join('');
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${value.split(' ')[0]}!`;
+            } else if (field === 'email') {
+                userData.email = value;
+            } else if (field === 'bio') {
+                userData.bio = value;
+            }
+            
+            showNotification('Profile updated successfully!', 'success');
+            saveUserData();
+        }
+
+        function changeAvatar() {
+            const avatars = ['🌱', '🚀', '⭐', '🔥', '💎', '🏆', '🎯', '⚡', '🌟', '💪'];
+            const currentAvatar = document.getElementById('profileAvatar').textContent;
+            const currentIndex = avatars.indexOf(currentAvatar);
+            const nextIndex = (currentIndex + 1) % avatars.length;
+            const newAvatar = avatars[nextIndex];
+            
+            document.getElementById('profileAvatar').textContent = newAvatar;
+            userData.badge = newAvatar;
+            document.getElementById('profileBadge').textContent = newAvatar;
+            
+            showNotification(`Avatar changed to ${newAvatar}!`, 'success');
+            saveUserData();
+        }
+
+        // Data Management Functions
+        function exportData() {
+            const exportData = {
+                userData: userData,
+                savedContent: savedContent,
+                exportDate: new Date().toISOString(),
+                version: '2.1.0'
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `focusflow-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('Data exported successfully! 📥', 'success');
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                if (confirm('This will reset your progress, settings, and saved content. Continue?')) {
+                    // Reset to default values
+                    userData = {
+                        name: 'Alex Rivera',
+                        email: 'alex@example.com',
+                        totalScore: 0,
+                        totalPoints: 0,
+                        level: 1,
+                        badge: '🌱',
+                        badgeTitle: 'Newbie',
+                        todaySessions: 0,
+                        weekStreak: 0,
+                        totalMinutes: 0,
+                        auraEarned: 0,
+                        settings: {
+                            focusReminders: true,
+                            breakNotifications: true,
+                            achievementAlerts: true,
+                            defaultFocusDuration: 25,
+                            breakDuration: 5,
+                            autoStartBreaks: false,
+                            theme: 'light'
+                        }
+                    };
+                    
+                    savedContent = [];
+                    
+                    // Reset UI
+                    updateDashboard();
+                    updateSessionStats();
+                    updateSavedContentList();
+                    
+                    // Reset timer
+                    resetTimer();
+                    
+                    showNotification('All data cleared! Starting fresh! 🔄', 'success');
+                    saveUserData();
+                }
+            }
+        }
+
+        function showPrivacyPolicy() {
+            const policyWindow = window.open('', '_blank', 'width=600,height=400');
+            policyWindow.document.write(`
+                <html>
+                <head>
+                    <title>Privacy Policy - FocusFlow</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                        h1 { color: #8B5CF6; }
+                        h2 { color: #6B46C1; margin-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🔒 FocusFlow Privacy Policy</h1>
+                    <h2>Data Collection</h2>
+                    <p>FocusFlow stores your data locally in your browser. We do not collect or transmit personal information to external servers.</p>
+                    
+                    <h2>Local Storage</h2>
+                    <p>Your progress, settings, and generated content are saved locally on your device using browser storage.</p>
+                    
+                    <h2>Data Security</h2>
+                    <p>Since all data remains on your device, you have full control over your information.</p>
+                    
+                    <h2>Data Export</h2>
+                    <p>You can export your data at any time using the export feature in settings.</p>
+                    
+                    <h2>Contact</h2>
+                    <p>For questions about privacy, contact us through the feedback feature.</p>
+                    
+                    <p><em>Last updated: ${new Date().toLocaleDateString()}</em></p>
+                </body>
+                </html>
+            `);
+        }
+
+        function showSupport() {
+            const supportWindow = window.open('', '_blank', 'width=500,height=600');
+            supportWindow.document.write(`
+                <html>
+                <head>
+                    <title>Support - FocusFlow</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                        h1 { color: #8B5CF6; }
+                        .faq { margin: 15px 0; padding: 10px; background: #F3F4F6; border-radius: 8px; }
+                        .question { font-weight: bold; color: #374151; }
+                        .answer { margin-top: 5px; color: #6B7280; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🆘 FocusFlow Support</h1>
+                    
+                    <div class="faq">
+                        <div class="question">How do I start a focus session?</div>
+                        <div class="answer">Go to the Timer tab, set your desired duration, and click Start!</div>
+                    </div>
+                    
+                    <div class="faq">
+                        <div class="question">Can I customize timer durations?</div>
+                        <div class="answer">Yes! Go to Settings > Timer Preferences to set your defaults.</div>
+                    </div>
+                    
+                    <div class="faq">
+                        <div class="question">How does the AI content generator work?</div>
+                        <div class="answer">Select a content type, describe what you need, and our AI will generate personalized content for you!</div>
+                    </div>
+                    
+                    <div class="faq">
+                        <div class="question">What are Aura points?</div>
+                        <div class="answer">Aura points are earned by completing focus sessions and help track your productivity progress!</div>
+                    </div>
+                    
+                    <div class="faq">
+                        <div class="question">How do I join study groups?</div>
+                        <div class="answer">Visit the Community tab to browse and join study groups that match your interests.</div>
+                    </div>
+                    
+                    <p><strong>Need more help?</strong> Use the feedback feature to contact us directly!</p>
+                </body>
+                </html>
+            `);
+        }
+
+        function showFeedback() {
+            const feedbackWindow = window.open('', '_blank', 'width=500,height=400');
+            feedbackWindow.document.write(`
+                <html>
+                <head>
+                    <title>Feedback - FocusFlow</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #8B5CF6; }
+                        textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #D1D5DB; border-radius: 8px; }
+                        button { background: #8B5CF6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+                        button:hover { background: #7C3AED; }
+                    </style>
+                </head>
+                <body>
+                    <h1>💬 Send Feedback</h1>
+                    <p>We'd love to hear from you! Share your thoughts, suggestions, or report issues.</p>
+                    
+                    <textarea placeholder="Tell us what you think about FocusFlow..."></textarea>
+                    <br><br>
+                    
+                    <button onclick="alert('Thank you for your feedback! We appreciate your input.'); window.close();">
+                        Send Feedback
+                    </button>
+                </body>
+                </html>
+            `);
+        }
+
+        // Data Persistence Functions
+        function saveUserData() {
+            try {
+                localStorage.setItem('focusflow_userData', JSON.stringify(userData));
+                localStorage.setItem('focusflow_savedContent', JSON.stringify(savedContent));
+            } catch (error) {
+                console.warn('Could not save data to localStorage:', error);
+            }
+        }
+
+        function loadUserData() {
+            try {
+                const savedUserData = localStorage.getItem('focusflow_userData');
+                const savedContentData = localStorage.getItem('focusflow_savedContent');
+                
+                if (savedUserData) {
+                    userData = { ...userData, ...JSON.parse(savedUserData) };
+                }
+                
+                if (savedContentData) {
+                    savedContent = JSON.parse(savedContentData);
+                }
+            } catch (error) {
+                console.warn('Could not load data from localStorage:', error);
+            }
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 translate-x-full`;
+            
+            // Set colors based on type
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                info: 'bg-blue-500 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
+            
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after delay
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+              
