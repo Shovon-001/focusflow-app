@@ -2050,3 +2050,86 @@ You've got this! The world needs what you have to offer. ✨`
             }, 3000);
         }
                 
+
+        // Final utility functions and cleanup
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function getProgressPercentage() {
+            const totalTime = isBreakTime ? userData.settings.breakDuration * 60 : userData.settings.defaultFocusDuration * 60;
+            return ((totalTime - currentTime) / totalTime) * 100;
+        }
+
+        function playNotificationSound() {
+            // Create a simple beep sound using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (error) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Auto-save data periodically
+        setInterval(saveUserData, 30000); // Save every 30 seconds
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            saveUserData();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Space bar to start/pause timer (when not typing in input)
+            if (e.code === 'Space' && !e.target.matches('input, textarea')) {
+                e.preventDefault();
+                if (isTimerRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            }
+            
+            // Escape to reset timer
+            if (e.code === 'Escape' && !e.target.matches('input, textarea')) {
+                resetTimer();
+            }
+        });
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial values
+            updateTimerDisplay();
+            updateProgressCircle();
+            
+            // Load any existing data
+            loadUserData();
+            
+            // Update displays
+            updateDashboard();
+            updateSessionStats();
+            updateSavedContentList();
+            
+            console.log('🚀 FocusFlow initialized successfully!');
+        });
+
+    </script>
+</body>
+    </html>
+                
