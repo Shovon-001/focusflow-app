@@ -1654,7 +1654,8 @@ You've got this! The world needs what you have to offer. ✨`
             }
         }
               
-        // Settings Functions
+     
+// Settings Functions
         function toggleSetting(settingName, value) {
             userData.settings[settingName] = value;
             
@@ -1947,6 +1948,72 @@ You've got this! The world needs what you have to offer. ✨`
             }
         }
 
+        // App Initialization
+        function initializeApp() {
+            // Load saved data
+            loadUserData();
+            
+            // Update UI elements
+            updateDashboard();
+            updateSessionStats();
+            updateSavedContentList();
+            updateTimerDisplay();
+            updateProgressCircle();
+            
+            // Set initial timer
+            currentTime = userData.settings.defaultFocusDuration * 60;
+            updateTimerDisplay();
+            
+            // Show dashboard by default
+            showSection('dashboard');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in (for demo purposes, auto-login)
+            if (localStorage.getItem('focusflow_userData')) {
+                currentUser = { email: userData.email, name: userData.name };
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                document.getElementById('userInitials').textContent = userData.name.split(' ').map(n => n[0]).join('');
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${userData.name.split(' ')[0]}!`;
+                initializeApp();
+            }
+        });
+
+        // App Initialization
+        function initializeApp() {
+            // Load saved data
+            loadUserData();
+            
+            // Update UI elements
+            updateDashboard();
+            updateSessionStats();
+            updateSavedContentList();
+            updateTimerDisplay();
+            updateProgressCircle();
+            
+            // Set initial timer
+            currentTime = userData.settings.defaultFocusDuration * 60;
+            updateTimerDisplay();
+            
+            // Show dashboard by default
+            showSection('dashboard');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in (for demo purposes, auto-login)
+            if (localStorage.getItem('focusflow_userData')) {
+                currentUser = { email: userData.email, name: userData.name };
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                document.getElementById('userInitials').textContent = userData.name.split(' ').map(n => n[0]).join('');
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${userData.name.split(' ')[0]}!`;
+                initializeApp();
+            }
+        });
+
         // Notification System
         function showNotification(message, type = 'info') {
             // Create notification element
@@ -1982,4 +2049,4 @@ You've got this! The world needs what you have to offer. ✨`
                 }, 300);
             }, 3000);
         }
-              
+                
